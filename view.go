@@ -153,14 +153,18 @@ func (v *View) empty() bool {
 func (v *View) contains(entity EntityID) bool {
 	sz := int(entity & entity_mask)
 	extent := v.minExtent()
-	contains := true
-	for _, pool := range v.Pools {
-		if pool.Has(entity) && pool.Data()[pool.SparseSet.Get(entity)] == entity {
-			contains = false
-			break
+
+	if sz < extent {
+		for _, pool := range v.Pools {
+			if pool.Has(entity) && pool.Data()[pool.SparseSet.Get(entity)] == entity {
+			} else {
+				return false
+			}
 		}
+		return true
+	} else {
+		return false
 	}
-	return sz < extent && contains
 }
 
 func (v *View) minExtent() int {
