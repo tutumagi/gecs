@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Registry of one independent ecs system
 type Registry struct {
 	pools    []*_Pool
 	handlers []*_Pool

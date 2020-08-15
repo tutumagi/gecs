@@ -371,6 +371,55 @@ func Test_GetSingle(t *testing.T) {
 	PanicMatches(t, func() { registry.GetSingle(entity1, PositionID) }, fmt.Sprintf("should have the entity %v", entity1))
 }
 
+func Test_Get(t *testing.T) {
+	registry := initRegistry()
+	entity0 := registry.Create()
+	registry.Assign(entity0, NameID, Name("zhanglei"))
+	registry.Assign(entity0, AgeID, Age(1000))
+	registry.Assign(entity0, PositionID, &Position{X: 10, Y: 15, Z: 20})
+
+	{
+		components := registry.Get(entity0, NameID)
+		Equal(t, len(components), 1)
+		Equal(t, components[NameID].(Name), Name("zhanglei"))
+	}
+	{
+		components := registry.Get(entity0, PositionID)
+		Equal(t, len(components), 1)
+		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
+	}
+	{
+		components := registry.Get(entity0, AgeID)
+		Equal(t, len(components), 1)
+		Equal(t, components[AgeID].(Age), Age(1000))
+	}
+	{
+		components := registry.Get(entity0, NameID, AgeID)
+		Equal(t, len(components), 2)
+		Equal(t, components[NameID].(Name), Name("zhanglei"))
+		Equal(t, components[AgeID].(Age), Age(1000))
+	}
+	{
+		components := registry.Get(entity0, NameID, PositionID)
+		Equal(t, len(components), 2)
+		Equal(t, components[NameID].(Name), Name("zhanglei"))
+		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
+	}
+	{
+		components := registry.Get(entity0, AgeID, PositionID)
+		Equal(t, len(components), 2)
+		Equal(t, components[AgeID].(Age), Age(1000))
+		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
+	}
+	{
+		components := registry.Get(entity0, NameID, AgeID, PositionID)
+		Equal(t, len(components), 3)
+		Equal(t, components[NameID].(Name), Name("zhanglei"))
+		Equal(t, components[AgeID].(Age), Age(1000))
+		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
+	}
+}
+
 func Test_Contains(t *testing.T) {
 	registry := initRegistry()
 	entity0 := registry.Create()
