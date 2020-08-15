@@ -3,6 +3,8 @@ package entt
 import (
 	"fmt"
 	"testing"
+
+	. "github.com/go-playground/assert/v2"
 )
 
 type Name string
@@ -15,14 +17,7 @@ type Position struct {
 type MapIntInt map[int32]int32
 
 func Test_Registry(t *testing.T) {
-	run(t)
-}
 
-func BenchmarkRegistry(b *testing.B) {
-	run(b)
-}
-
-func run(t testing.TB) {
 	registry := newRegistry()
 
 	name := registry.RegisterComponent("name", false)
@@ -30,7 +25,7 @@ func run(t testing.TB) {
 	position := registry.RegisterComponent("position", false)
 	mapIntInt := registry.RegisterComponent("mapintint", false)
 
-	printNameAgePosition := func() {
+	printNameAgePositionMap := func() {
 		fmt.Println()
 		t.Log("Name & Age & Position & MapIntInt")
 		registry.View(name, age, position, mapIntInt).Each(func(entity EntityID, datas map[ComponentID]interface{}) {
@@ -38,6 +33,15 @@ func run(t testing.TB) {
 			t.Logf("entity %v %+v", entity, datas[age].(Age))
 			t.Logf("entity %v %+v", entity, datas[position].(*Position))
 			t.Logf("entity %v %+v", entity, datas[mapIntInt].(MapIntInt))
+		})
+	}
+	printNameAgePosition := func() {
+		fmt.Println()
+		t.Log("Name & Age & Position")
+		registry.View(name, age, position, mapIntInt).Each(func(entity EntityID, datas map[ComponentID]interface{}) {
+			t.Logf("entity %v %+v", entity, datas[name].(Name))
+			t.Logf("entity %v %+v", entity, datas[age].(Age))
+			t.Logf("entity %v %+v", entity, datas[position].(*Position))
 		})
 	}
 	printNameAge := func() {
@@ -86,35 +90,55 @@ func run(t testing.TB) {
 		})
 	}
 
-	entity0 := registry.Create()
-	registry.Assign(entity0, name, Name("tufei"))
-	registry.Assign(entity0, age, Age(12))
-	registry.Assign(entity0, position, &Position{X: 10, Y: 15, Z: 20})
-	registry.Assign(entity0, mapIntInt, MapIntInt{3: 4, 5: 6, 7: 8})
+	{
+		entity0 := registry.Create()
+		registry.Assign(entity0, name, Name("tufei"))
+		registry.Assign(entity0, age, Age(12))
+		registry.Assign(entity0, position, &Position{X: 10, Y: 15, Z: 20})
+		registry.Assign(entity0, mapIntInt, MapIntInt{3: 4, 5: 6, 7: 8})
 
-	entity1 := registry.Create()
-	registry.Assign(entity1, name, Name("weijie"))
-	registry.Assign(entity1, age, Age(20))
+		entity1 := registry.Create()
+		registry.Assign(entity1, name, Name("weijie"))
+		registry.Assign(entity1, age, Age(20))
 
-	entity2 := registry.Create()
-	registry.Assign(entity2, name, Name("yihao"))
-	registry.Assign(entity2, position, &Position{X: 100, Y: 150, Z: 200})
+		entity2 := registry.Create()
+		registry.Assign(entity2, name, Name("yihao"))
+		registry.Assign(entity2, position, &Position{X: 100, Y: 150, Z: 200})
 
-	entity3 := registry.Create()
-	registry.Assign(entity3, name, Name("zhijun"))
-	registry.Assign(entity3, age, Age(200))
+		entity3 := registry.Create()
+		registry.Assign(entity3, name, Name("zhijun"))
+		registry.Assign(entity3, age, Age(200))
+		printNameAgePosition()
 
-	printNameAgePosition()
-	printNameAge()
-	printNamePosition()
-	printAgePosition()
-	printName()
-	printAge()
-	printPosition()
+		Equal(t, registry.View(name).size(), 4)
+		Equal(t, registry.View(position).size(), 2)
+		Equal(t, registry.View(age).size(), 3)
+		Equal(t, registry.View(mapIntInt).size(), 1)
 
-	registry.Destroy(entity0)
-	registry.Destroy(entity1)
-	registry.Destroy(entity2)
+		Equal(t, registry.View(name, position).size(), 2)
+		Equal(t, registry.View(name, age).size(), 3)
+		Equal(t, registry.View(name, mapIntInt).size(), 1)
+
+		Equal(t, registry.View(name, position, age).size(), 1)
+		Equal(t, registry.View(name, position, mapIntInt).size(), 1)
+		Equal(t, registry.View(position, age, mapIntInt).size(), 1)
+		Equal(t, registry.View(name, age, mapIntInt).size(), 1)
+
+		Equal(t, registry.View(name, age, position, mapIntInt).size(), 1)
+
+		printNameAgePosition()
+		printNameAgePositionMap()
+		printNameAge()
+		printNamePosition()
+		printAgePosition()
+		printName()
+		printAge()
+		printPosition()
+
+		registry.Destroy(entity0)
+		registry.Destroy(entity1)
+		registry.Destroy(entity2)
+	}
 
 	printNameAgePosition()
 	printNameAge()

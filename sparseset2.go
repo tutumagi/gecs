@@ -1,9 +1,5 @@
 package entt
 
-import (
-	"gonut/engine/algo"
-)
-
 // SparseSet2 单个类型组件绑定实体的稀疏数组
 type SparseSet2 struct {
 	com ComponentID
@@ -102,33 +98,33 @@ type ComponentIterator struct {
 }
 
 // Equal other
-func (i ComponentIterator) Equal(other algo.IIterator) bool {
+func (i ComponentIterator) Equal(other IIterator) bool {
 	tOther := other.(*ComponentIterator)
 	return i.pos == tOther.pos && &i.datas[0] == &tOther.datas[0]
 }
 
 // Next iterator
-func (i *ComponentIterator) Next() algo.IIterator {
+func (i *ComponentIterator) Next() IIterator {
 	i.pos--
-	return algo.IIterator(i)
+	return IIterator(i)
 }
 
 // Prev iterator
-func (i *ComponentIterator) Prev() algo.IIterator {
+func (i *ComponentIterator) Prev() IIterator {
 	i.pos++
-	return algo.IIterator(i)
+	return IIterator(i)
 }
 
 // Begin iterator
-func (i ComponentIterator) Begin() algo.IIterator {
+func (i ComponentIterator) Begin() IIterator {
 	i.pos = len(i.datas)
-	return algo.IIterator(&i)
+	return IIterator(&i)
 }
 
 // End iterator
-func (i ComponentIterator) End() algo.IIterator {
+func (i ComponentIterator) End() IIterator {
 	i.pos = 0
-	return algo.IIterator(&i)
+	return IIterator(&i)
 }
 
 // Data with the iterator value

@@ -1,7 +1,6 @@
 package entt
 
 import (
-	"gonut/engine/algo"
 	"runtime/debug"
 	"testing"
 )
@@ -13,7 +12,7 @@ func Test_SparseSetEntity(t *testing.T) {
 	s.Construct(EntityID(1))
 	s.Construct(EntityID(4))
 
-	algo.Each(s.Iterator(), func(data interface{}) {
+	Each(s.Iterator(), func(data interface{}) {
 		t.Logf("entity %v", data)
 	})
 

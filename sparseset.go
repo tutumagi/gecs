@@ -2,7 +2,6 @@ package entt
 
 import (
 	"fmt"
-	"gonut/engine/algo"
 )
 
 const _EnttPageSize int = 2 << 14
@@ -150,7 +149,7 @@ type _EntityIDIterator struct {
 }
 
 // Equal other
-func (i _EntityIDIterator) Equal(other algo.IIterator) bool {
+func (i _EntityIDIterator) Equal(other IIterator) bool {
 	tOther := other.(*_EntityIDIterator)
 	if i.pos != tOther.pos {
 		return false
@@ -165,27 +164,27 @@ func (i _EntityIDIterator) Equal(other algo.IIterator) bool {
 }
 
 // Next iterator
-func (i *_EntityIDIterator) Next() algo.IIterator {
+func (i *_EntityIDIterator) Next() IIterator {
 	i.pos--
-	return algo.IIterator(i)
+	return IIterator(i)
 }
 
 // Prev iterator
-func (i *_EntityIDIterator) Prev() algo.IIterator {
+func (i *_EntityIDIterator) Prev() IIterator {
 	i.pos++
-	return algo.IIterator(i)
+	return IIterator(i)
 }
 
 // Begin iterator
-func (i _EntityIDIterator) Begin() algo.IIterator {
+func (i _EntityIDIterator) Begin() IIterator {
 	i.pos = len(i.datas)
-	return algo.IIterator(&i)
+	return IIterator(&i)
 }
 
 // End iterator
-func (i _EntityIDIterator) End() algo.IIterator {
+func (i _EntityIDIterator) End() IIterator {
 	i.pos = 0
-	return algo.IIterator(&i)
+	return IIterator(&i)
 }
 
 // Data with the iterator value

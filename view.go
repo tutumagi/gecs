@@ -2,7 +2,6 @@ package entt
 
 import (
 	"fmt"
-	"gonut/engine/algo"
 )
 
 // SingleView Single component view specialization.
@@ -64,7 +63,7 @@ func (v *SingleView) Get(entity EntityID) interface{} {
 func (v *SingleView) Each(fn func(entity EntityID, datas map[ComponentID]interface{})) {
 	comIter := v.Pool.Iterator()
 	entityIter := v.Pool.SparseSet.Iterator()
-	algo.Each(entityIter, func(data interface{}) {
+	Each(entityIter, func(data interface{}) {
 		// fn(data.(EntityID), comIter.Data())
 		fn(data.(EntityID), map[ComponentID]interface{}{v.Pool.com: comIter.Data()})
 		comIter.Next()
@@ -129,9 +128,10 @@ func (v *View) candicate() (*SparseSet, *SparseSet2) {
 	return minPool.SparseSet, minPool
 }
 
+// Estimates the number of entities iterated by the view.
 func (v *View) size() int {
 	var minPool *SparseSet = v.Pools[0].SparseSet
-	for _, pool := range v.Pools {
+	for _, pool := range v.Pools[1:] {
 		if pool.Size() < minPool.Size() {
 			minPool = pool.SparseSet
 		}
@@ -210,7 +210,7 @@ func (v *View) each(cpool *SparseSet2, fn func(entity EntityID, comDatas map[Com
 	end := cpool.SparseSet.End()
 	begin := cpool.SparseSet.Iterator()
 
-	for !begin.Equal(algo.IIterator(end)) {
+	for !begin.Equal(IIterator(end)) {
 		ordered := true
 		for _, data := range datas {
 			if data.Data() != begin.Data() {
@@ -234,7 +234,7 @@ func (v *View) each(cpool *SparseSet2, fn func(entity EntityID, comDatas map[Com
 		}
 	}
 
-	for !begin.Equal(algo.IIterator(end)) {
+	for !begin.Equal(IIterator(end)) {
 
 		entity := begin.Data().(EntityID)
 		// it := cpool.Begin()
