@@ -8,8 +8,11 @@ import (
 
 func Test_SparseSetEntity(t *testing.T) {
 	s := NewSparseSet()
+	Equal(t, s.Empty(), true)
 	s.Reserve(100)
+	Equal(t, s.Empty(), true)
 	s.Emplace(EntityID(5))
+	Equal(t, s.Empty(), false)
 	s.Emplace(EntityID(1))
 	s.Emplace(EntityID(4))
 
@@ -27,38 +30,38 @@ func Test_SparseSetEntity(t *testing.T) {
 	Equal(t, s.Has(EntityID(5)), false)
 	Equal(t, s.Has(EntityID(1)), true)
 	Equal(t, s.Has(EntityID(4)), true)
+
+	s.Destroy(EntityID(1))
+	s.Destroy(EntityID(4))
+	Equal(t, s.Empty(), true)
 }
 
 type _Data1 struct {
 	name string
 }
 
-func Test_SparseSet2(t *testing.T) {
-	s := NewStorage(ComponentID(1))
-	s.Reserve(100)
-	s.Emplace(EntityID(5), &_Data1{"tufei5"})
-	s.Emplace(EntityID(1), &_Data1{"tufei1"})
-	s.Emplace(EntityID(4), &_Data1{"tufei4"})
-	s.Emplace(EntityID(10), &_Data1{"tufei10"})
+func Test_SparseSwap(t *testing.T) {
+	s := NewSparseSet()
 
-	t.Logf("s %v", s)
-	Equal(t, s.Has(EntityID(5)), true)
-	Equal(t, s.Has(EntityID(1)), true)
-	Equal(t, s.Has(EntityID(4)), true)
-	Equal(t, s.Has(EntityID(10)), true)
+	entity5 := EntityID(5)
+	entity1 := EntityID(1)
+	entity4 := EntityID(4)
+	entity10 := EntityID(10)
 
-	Equal(t, s.Get(EntityID(5)).(*_Data1).name, "tufei5")
-	Equal(t, s.Get(EntityID(1)).(*_Data1).name, "tufei1")
-	Equal(t, s.Get(EntityID(4)).(*_Data1).name, "tufei4")
-	Equal(t, s.Get(EntityID(10)).(*_Data1).name, "tufei10")
+	s.Emplace(entity5)
+	s.Emplace(entity1)
+	s.Emplace(entity4)
+	s.Emplace(entity10)
 
-	s.Destroy(EntityID(5))
-	Equal(t, s.Has(EntityID(5)), false)
-	s.Emplace(EntityID(5), &_Data1{"tufei5"})
-	// s.Destroy(EntityID(5))
-	t.Logf("s %v", s)
-	Equal(t, s.Has(EntityID(1)), true)
-	Equal(t, s.Has(EntityID(4)), true)
-	Equal(t, s.Has(EntityID(5)), true)
+	Equal(t, s.Has(entity5), true)
+	Equal(t, s.Has(entity1), true)
+	Equal(t, s.Has(entity4), true)
+	Equal(t, s.Has(entity10), true)
 
+	s.swap(entity1, entity5)
+
+	Equal(t, s.Has(entity5), true)
+	Equal(t, s.Has(entity1), true)
+	Equal(t, s.Has(entity4), true)
+	Equal(t, s.Has(entity10), true)
 }

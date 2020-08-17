@@ -71,7 +71,7 @@ func (v *View) size() int {
 
 func (v *View) empty() bool {
 	var maxPool *SparseSet = v.Pools[0].SparseSet
-	for _, pool := range v.Pools {
+	for _, pool := range v.Pools[1:] {
 		if pool.Size() > maxPool.Size() {
 			maxPool = pool.SparseSet
 		}
@@ -116,13 +116,14 @@ func (v *View) Get(entity EntityID, com ComponentID) interface{} {
 }
 
 // GetMulti 获取绑定多个组件的实体身上的组件数据
-func (v *View) GetMulti(entity EntityID, coms ...ComponentID) []interface{} {
+func (v *View) GetMulti(entity EntityID, coms ...ComponentID) map[ComponentID]interface{} {
 	if !v.contains(entity) {
 		panic("view should have entity, but not")
 	}
-	ret := make([]interface{}, 0, len(coms))
+	ret := make(map[ComponentID]interface{}, len(coms))
 	for _, com := range coms {
-		ret = append(ret, v.getSinglePool(com).Get(entity))
+		pool := v.getSinglePool(com)
+		ret[pool.com] = pool.Get(entity)
 	}
 	return ret
 }

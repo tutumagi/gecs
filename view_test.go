@@ -20,55 +20,100 @@ func Test_View(t *testing.T) {
 
 	singleView := NewView(nameStorage)
 	multiView := NewView(nameStorage, ageStorage, countStorage)
+	Equal(t, singleView.empty(), true)
+	Equal(t, multiView.empty(), true)
 
 	entity0 := EntityID(0)
-	nameStorage.Emplace(entity0, "foo")
-
+	nameStorage.Emplace(entity0, "entity0")
 	entity1 := EntityID(1)
+
 	Equal(t, singleView.contains(entity0), true)
 	Equal(t, singleView.contains(entity1), false)
 	Equal(t, singleView.size(), 1)
-	singleView.Each(func(entity EntityID, datas map[ComponentID]interface{}) {
-		Equal(t, entity, entity0)
-		Equal(t, datas[nameID].(string), "foo")
-	})
-	Equal(t, multiView.contains(entity0), false)
-	Equal(t, multiView.size(), 0)
+	Equal(t, singleView.Get(entity0, nameID).(string), "entity0")
+	PanicMatches(t, func() { singleView.Get(entity1, nameID) }, "view should have entity, but not")
 
-	nameStorage.Emplace(entity1, "bar")
+	Equal(t, multiView.contains(entity0), false)
+	equalCountView(t, multiView, 0)
+	PanicMatches(t, func() { multiView.Get(entity0, nameID) }, "view should have entity, but not")
+
+	nameStorage.Emplace(entity1, "entity1")
+
 	Equal(t, singleView.contains(entity0), true)
 	Equal(t, singleView.contains(entity1), true)
 	Equal(t, singleView.size(), 2)
+	Equal(t, singleView.Get(entity0, nameID).(string), "entity0")
+	Equal(t, singleView.Get(entity1, nameID).(string), "entity1")
 
-	singleView.Each(func(entity EntityID, datas map[ComponentID]interface{}) {
-		checkComDataFromMapData(datas, nameID, "foo", "bar")
-	})
+	equalCountView(t, multiView, 0)
+	PanicMatches(t, func() { multiView.Get(entity0, nameID) }, "view should have entity, but not")
 
 	nameStorage.Destroy(entity0)
 
 	Equal(t, singleView.contains(entity0), false)
 	Equal(t, singleView.contains(entity1), true)
 	Equal(t, singleView.size(), 1)
-	singleView.Each(func(entity EntityID, datas map[ComponentID]interface{}) {
-		Equal(t, entity, entity1)
-		Equal(t, datas[nameID].(string), "bar")
-	})
+	PanicMatches(t, func() { singleView.Get(entity0, nameID) }, "view should have entity, but not")
+	Equal(t, singleView.Get(entity1, nameID).(string), "entity1")
+
+	equalCountView(t, multiView, 0)
 
 	entity2 := EntityID(2)
 	nameStorage.Emplace(entity2, "entity2")
 	ageStorage.Emplace(entity2, 18)
 	countStorage.Emplace(entity2, &Count{count: 100})
 
-	Equal(t, multiView.contains(entity2), true)
 	equalCountView(t, multiView, 1)
+	Equal(t, multiView.contains(entity2), true)
+	Equal(t, multiView.Get(entity2, nameID).(string), "entity2")
+	Equal(t, multiView.Get(entity2, ageID).(int), 18)
+	Equal(t, multiView.Get(entity2, countID).(*Count), &Count{count: 100})
+	Equal(t, multiView.GetMulti(entity2, nameID, ageID, countID), map[ComponentID]interface{}{
+		nameID:  "entity2",
+		ageID:   18,
+		countID: &Count{count: 100},
+	})
+	Equal(t, multiView.GetMulti(entity2, nameID, ageID), map[ComponentID]interface{}{
+		nameID: "entity2",
+		ageID:  18,
+	})
+	Equal(t, multiView.GetMulti(entity2, countID, ageID), map[ComponentID]interface{}{
+		ageID:   18,
+		countID: &Count{count: 100},
+	})
 
 	entity3 := EntityID(3)
 	nameStorage.Emplace(entity3, "entity3")
 	ageStorage.Emplace(entity3, 22)
 	countStorage.Emplace(entity3, &Count{count: 85})
 
-	Equal(t, multiView.contains(entity3), true)
 	equalCountView(t, multiView, 2)
+	Equal(t, multiView.contains(entity3), true)
+	Equal(t, multiView.Get(entity3, nameID).(string), "entity3")
+	Equal(t, multiView.Get(entity3, ageID).(int), 22)
+	Equal(t, multiView.Get(entity3, countID).(*Count), &Count{count: 85})
+	Equal(t, multiView.GetMulti(entity3, nameID, ageID, countID), map[ComponentID]interface{}{
+		nameID:  "entity3",
+		ageID:   22,
+		countID: &Count{count: 85},
+	})
+	Equal(t, multiView.GetMulti(entity3, nameID, ageID), map[ComponentID]interface{}{
+		nameID: "entity3",
+		ageID:  22,
+	})
+	Equal(t, multiView.GetMulti(entity3, countID, ageID), map[ComponentID]interface{}{
+		ageID:   22,
+		countID: &Count{count: 85},
+	})
+
+	ageStorage.Destroy(entity3)
+	Equal(t, multiView.size(), 1)
+	Equal(t, multiView.contains(entity3), false)
+	equalCountView(t, multiView, 1)
+	PanicMatches(t, func() { multiView.GetMulti(entity3, nameID, ageID, countID) }, "view should have entity, but not")
+
+	nameStorage.Destroy(entity2)
+	equalCountView(t, multiView, 0)
 }
 
 func equalCountView(t *testing.T, view IteratorView, count int) {
