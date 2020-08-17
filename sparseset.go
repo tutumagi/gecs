@@ -96,12 +96,6 @@ func (s *SparseSet) Index(entityID EntityID) int {
 	return int(s.sparse[s.page(entityID)][s.offset(entityID)])
 }
 
-// Fast 快速检查是否还有此entity，不会做pos的越界检查
-func (s *SparseSet) Fast(entity EntityID) bool {
-	pos := int(entity & entity_mask)
-	return s.packed[pos] != DefaultPlaceholder
-}
-
 // Emplace assign an entity to a sparse set
 func (s *SparseSet) Emplace(entity EntityID) {
 	s.assure(s.page(entity))[s.offset(entity)] = EntityID(len(s.packed))

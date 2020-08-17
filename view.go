@@ -177,7 +177,7 @@ func (v *View) each(cpool *Storage, fn func(entity EntityID, comDatas map[Compon
 		if sz < minExtend && allOf(other, entity) {
 			comDatas := make(map[ComponentID]interface{}, len(v.Pools))
 			for _, pool := range v.Pools {
-				if pool.Fast(entity) {
+				if pool.Has(entity) {
 					comDatas[pool.com] = pool.Get(entity)
 				}
 			}
@@ -191,7 +191,7 @@ func (v *View) each(cpool *Storage, fn func(entity EntityID, comDatas map[Compon
 
 func allOf(pools []*SparseSet, entity EntityID) bool {
 	for _, pool := range pools {
-		if pool.Fast(entity) == false {
+		if pool.Has(entity) == false {
 			return false
 		}
 	}
