@@ -106,3 +106,24 @@ func extendPoolWithValue(slice []*_Pool, newCap int, value *_Pool) []*_Pool {
 
 	return slice
 }
+
+// extend2DEntityArrayWithValue 扩大slice 的cap
+func extend2DEntityArrayWithValue(slice [][]EntityID, newCap int, value []EntityID) [][]EntityID {
+	if cap(slice) >= newCap {
+		return slice
+	}
+
+	oldLen := len(slice)
+
+	newSlice := make([][]EntityID, len(slice), newCap)
+	copy(newSlice, slice)
+	slice = newSlice
+
+	for i := oldLen; i < cap(slice); i++ {
+		newValue := make([]EntityID, len(value), cap(value))
+		copy(newValue, value)
+		slice = append(slice, newValue)
+	}
+
+	return slice
+}

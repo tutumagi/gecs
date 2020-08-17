@@ -68,6 +68,14 @@ func (r *Registry) Remove(entity EntityID, component ComponentID) {
 	r.getSinglePool(component).destroy(entity)
 }
 
+func (r *Registry) Reserve(cap int) {
+	extendEntitySliceWithValue(r.entities, cap, DefaultPlaceholder)
+}
+
+func (r *Registry) ReserveComponent(cap int, coms ...ComponentID) {
+
+}
+
 func (r *Registry) managed(componentID ComponentID) bool {
 	ctype := r.componentFamily[componentID]
 	return ctype < len(r.pools) && r.pools[ctype] != nil
@@ -147,16 +155,16 @@ func (r *Registry) RegisterComponent(name string, persistent bool) ComponentID {
 
 // View by coms
 func (r *Registry) View(coms ...ComponentID) *View {
-	pools := make([]*SparseSet2, 0, len(coms))
+	pools := make([]*Storage, 0, len(coms))
 	for _, com := range coms {
-		pools = append(pools, r.getSinglePool(com).SparseSet2)
+		pools = append(pools, r.getSinglePool(com).Storage)
 	}
 	return NewView(pools...)
 }
 
 // SingleView by single com
 func (r *Registry) SingleView(com ComponentID) *SingleView {
-	return NewSingleView(r.getSinglePool(com).SparseSet2)
+	return NewSingleView(r.getSinglePool(com).Storage)
 }
 
 // Destroy entity
@@ -185,7 +193,7 @@ func (r *Registry) Destroy(entity EntityID) {
 // Replace entity com data with newData
 func (r *Registry) Replace(entity EntityID, com ComponentID, newData interface{}) {
 	cpool := r.getSinglePool(com)
-	cpool.SparseSet2.Replace(entity, newData)
+	cpool.Storage.Replace(entity, newData)
 }
 
 // --------------------- pool ---------------------
@@ -193,25 +201,25 @@ func (r *Registry) Replace(entity EntityID, com ComponentID, newData interface{}
 // _Pool
 // entt/registry.hpp 这里会有 实体的component的构造和销毁通知
 type _Pool struct {
-	*SparseSet2
+	*Storage
 
 	r *Registry
 }
 
 func newPool(r *Registry, com ComponentID) *_Pool {
 	return &_Pool{
-		SparseSet2: NewSparseSet2(com),
-		r:          r,
+		Storage: NewStorage(com),
+		r:       r,
 	}
 }
 
 func (p *_Pool) construct(entity EntityID, data interface{}) interface{} {
-	p.SparseSet2.Construct(entity, data)
+	p.Storage.Emplace(entity, data)
 	return data
 }
 
 func (p *_Pool) destroy(entity EntityID) {
-	p.SparseSet2.Destroy(entity)
+	p.Storage.Destroy(entity)
 }
 
 type _TypeMap map[ComponentID]int

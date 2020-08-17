@@ -1,86 +1,16 @@
 package entt
 
-import (
-	"fmt"
-)
-
-// SingleView Single component view specialization.
-type SingleView struct {
-	Pool *SparseSet2
-}
-
-func NewSingleView(pool *SparseSet2) *SingleView {
-	return &SingleView{
-		Pool: pool,
-	}
-}
-
-// Size of the entities that has the given component
-func (v *SingleView) Size() int {
-	return v.Pool.Size()
-}
-
-// Empty check if the entities is empty
-func (v *SingleView) Empty() bool {
-	return v.Pool.Empty()
-}
-
-// Raw return the array of components
-func (v *SingleView) Raw() []interface{} {
-	return v.Pool.Raw()
-}
-
-// Data direct access to the list of entities
-func (v *SingleView) Data() []EntityID {
-	return v.Pool.Data()
-}
-
-// Begin an iterator to the first entity that has the given component
-func (v *SingleView) Begin() *_EntityIDIterator {
-	return v.Pool.SparseSet.Begin()
-}
-
-// End an iterator to the entity following the last entity that has the given component
-func (v *SingleView) End() *_EntityIDIterator {
-	return v.Pool.SparseSet.End()
-}
-
-// Contains check if a view contains en entity
-func (v *SingleView) Contains(entity EntityID) bool {
-	return v.Pool.Has(entity) && v.Pool.Data()[v.Pool.SparseSet.Get(entity)] == entity
-}
-
-// Get the component data assigned the entity
-func (v *SingleView) Get(entity EntityID) interface{} {
-	if !v.Contains(entity) {
-		panic(fmt.Sprintf("entity(%v)should have the component", entity))
-	}
-	return v.Pool.Get(entity)
-}
-
-// Each Iterates entities and components and applies the given function object to them
-// func (v *SingleView) Each(fn func(entity EntityID, data interface{})) {
-func (v *SingleView) Each(fn func(entity EntityID, datas map[ComponentID]interface{})) {
-	comIter := v.Pool.Iterator()
-	entityIter := v.Pool.SparseSet.Iterator()
-	Each(entityIter, func(data interface{}) {
-		// fn(data.(EntityID), comIter.Data())
-		fn(data.(EntityID), map[ComponentID]interface{}{v.Pool.com: comIter.Data()})
-		comIter.Next()
-	})
-}
-
 // --------------- Multiple component view ----------------
 
 // View multiple component view
 type View struct {
-	Pools []*SparseSet2
+	Pools []*Storage
 
 	coms     map[ComponentID]uint8
 	indexSeq []int
 }
 
-func NewView(pools ...*SparseSet2) *View {
+func NewView(pools ...*Storage) *View {
 	v := &View{}
 	v.coms = make(map[ComponentID]uint8)
 	v.indexSeq = make([]int, 0, len(pools)-1)
@@ -100,7 +30,7 @@ func (v *View) indexOfCom(com ComponentID) int {
 	return int(v.coms[com])
 }
 
-func (v *View) getSinglePool(com ComponentID) *SparseSet2 {
+func (v *View) getSinglePool(com ComponentID) *Storage {
 	return v.Pools[v.indexOfCom(com)]
 }
 
@@ -117,8 +47,8 @@ func (v *View) unchecked(view *SparseSet) []*SparseSet {
 }
 
 // candicate 找到组件集 中，最少组件的那个实体列表和 组件集合
-func (v *View) candicate() (*SparseSet, *SparseSet2) {
-	var minPool *SparseSet2 = v.Pools[0]
+func (v *View) candicate() (*SparseSet, *Storage) {
+	var minPool *Storage = v.Pools[0]
 	for _, pool := range v.Pools[1:] {
 		if pool.Size() < minPool.Size() {
 			minPool = pool
@@ -156,7 +86,7 @@ func (v *View) contains(entity EntityID) bool {
 
 	if sz < extent {
 		for _, pool := range v.Pools {
-			if pool.Has(entity) && pool.Data()[pool.SparseSet.Get(entity)] == entity {
+			if pool.Has(entity) && pool.Data()[pool.SparseSet.Index(entity)] == entity {
 			} else {
 				return false
 			}
@@ -197,7 +127,7 @@ func (v *View) GetMulti(entity EntityID, coms ...ComponentID) []interface{} {
 	return ret
 }
 
-func (v *View) each(cpool *SparseSet2, fn func(entity EntityID, comDatas map[ComponentID]interface{})) {
+func (v *View) each(cpool *Storage, fn func(entity EntityID, comDatas map[ComponentID]interface{})) {
 
 	other := v.unchecked(cpool.SparseSet)
 	minExtend := v.minExtent()
