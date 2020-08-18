@@ -7,8 +7,7 @@ type View struct {
 	Pools []*Storage
 
 	// value is the index of componentID in pools
-	coms     map[ComponentID]uint8
-	indexSeq []int
+	coms map[ComponentID]uint8
 
 	filter []*Storage
 }
@@ -16,23 +15,18 @@ type View struct {
 func newView(pools ...*Storage) *View {
 	v := &View{}
 	v.coms = make(map[ComponentID]uint8)
-	v.indexSeq = make([]int, 0, len(pools)-1)
 	for i, pool := range pools {
 		v.coms[pool.com] = uint8(i)
-
-		if i < cap(v.indexSeq) {
-			v.indexSeq = append(v.indexSeq, i)
-		}
 	}
 	v.Pools = pools
 
 	return v
 }
 
-func (v *View) withInclude(include ...*Storage) *View {
-	v.Pools = include
-	return v
-}
+// func (v *View) withInclude(include ...*Storage) *View {
+// 	v.Pools = include
+// 	return v
+// }
 
 func (v *View) withExclude(filter ...*Storage) *View {
 	v.filter = filter
