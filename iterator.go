@@ -1,5 +1,6 @@
 package gecs
 
+// IIterator iterator interface
 type IIterator interface {
 	Prev() IIterator
 	Next() IIterator
@@ -9,6 +10,7 @@ type IIterator interface {
 	Data() interface{}
 }
 
+// Each iterator the items
 func Each(items IIterator, f func(data interface{})) {
 	for first := items.Begin(); !first.Equal(items.End()); {
 		f(first.Data())
@@ -16,6 +18,7 @@ func Each(items IIterator, f func(data interface{})) {
 	}
 }
 
+// ReverseEach iterator the items by reverse order
 func ReverseEach(items IIterator, f func(data interface{})) {
 	for first := items.End(); !first.Equal(items.Begin()); {
 		first = first.Prev()
@@ -23,12 +26,12 @@ func ReverseEach(items IIterator, f func(data interface{})) {
 	}
 }
 
-func AllOf(items IIterator, f func(data interface{}) bool) bool {
-	for first := items.Begin(); !first.Equal(items.End()); {
-		if f(first.Data()) == false {
-			return false
-		}
-		first = first.Next()
-	}
-	return true
-}
+// func AllOf(items IIterator, f func(data interface{}) bool) bool {
+// 	for first := items.Begin(); !first.Equal(items.End()); {
+// 		if f(first.Data()) == false {
+// 			return false
+// 		}
+// 		first = first.Next()
+// 	}
+// 	return true
+// }

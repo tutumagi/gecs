@@ -18,8 +18,8 @@ func Test_View(t *testing.T) {
 	countID := ComponentID(3)
 	countStorage := NewStorage(countID)
 
-	singleView := NewView(nameStorage)
-	multiView := NewView(nameStorage, ageStorage, countStorage)
+	singleView := newView(nameStorage)
+	multiView := newView(nameStorage, ageStorage, countStorage)
 	Equal(t, singleView.empty(), true)
 	Equal(t, multiView.empty(), true)
 

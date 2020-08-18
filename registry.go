@@ -12,7 +12,7 @@ type Registry struct {
 	destroyed EntityID
 
 	// componentName -> componentID
-	checkComponentFamily _NameMap
+	checkComponentFamily _KVStrInt
 }
 
 func newRegistry() *Registry {
@@ -20,7 +20,7 @@ func newRegistry() *Registry {
 		pools:    make([]*_PoolHandler, 0),
 		entities: make([]EntityID, 0, 1<<19), // 最多同时52w 左右个实体
 
-		checkComponentFamily: make(_NameMap, 0),
+		checkComponentFamily: make(_KVStrInt, 0),
 
 		destroyed: DefaultPlaceholder,
 	}
@@ -36,11 +36,15 @@ func (r *Registry) Size() int {
 	return len(r.entities)
 }
 
+// Alive returns the number of entities still in use
 func (r *Registry) Alive() int {
-	// sz := len(r.entities)
-	// curr := destroyed
+	sz := len(r.entities)
+	curr := r.destroyed
+	for ; curr != DefaultPlaceholder; sz-- {
+		curr = r.entities[int(curr)&entityMask]
+	}
 
-	return 0
+	return sz
 }
 
 // ReserveComs Increases the capacity of the pools for the given components.
@@ -100,20 +104,20 @@ func (r *Registry) Data() []EntityID {
 
 // Valid check if an entity identifier refers to a valid entity
 func (r *Registry) Valid(entity EntityID) bool {
-	pos := int(entity) & entity_mask
+	pos := int(entity) & entityMask
 	return pos < len(r.entities) && r.entities[pos] == entity
 }
 
 // Version Returns the version stored along with an entity identifier
 func (r *Registry) Version(entity EntityID) int {
-	return int(entity) >> entity_shift
+	return int(entity) >> entityShift
 }
 
 // Current Returns the actual version for an entity identifier
 //	make sure the entity is belong to the registry
 func (r *Registry) Current(entity EntityID) int {
-	pos := int(entity) & entity_mask
-	return int(r.entities[pos]) >> entity_shift
+	pos := int(entity) & entityMask
+	return int(r.entities[pos]) >> entityShift
 }
 
 // Create a new entity and return it
@@ -129,8 +133,8 @@ func (r *Registry) Create() EntityID {
 		r.entities = append(r.entities, entt)
 	} else {
 		curr := int(r.destroyed)
-		version := int(r.entities[curr]) & (version_mask << entity_shift)
-		r.destroyed = EntityID(int(r.entities[curr]) & entity_mask)
+		version := int(r.entities[curr]) & (versionMask << entityShift)
+		r.destroyed = EntityID(int(r.entities[curr]) & entityMask)
 		entt = EntityID(curr | version)
 		r.entities[curr] = entt
 	}
@@ -157,13 +161,13 @@ func (r *Registry) Create() EntityID {
 
 // Destroy an entity
 func (r *Registry) Destroy(entity EntityID) {
-	version := int(entity)>>entity_shift + 1
+	version := int(entity)>>entityShift + 1
 
 	r.RemoveAll(entity)
 
 	// lengthens the implicit list of destroyed entities
-	entt := int(entity) & entity_mask
-	r.entities[entt] = EntityID(int(r.destroyed) | (version << entity_shift))
+	entt := int(entity) & entityMask
+	r.entities[entt] = EntityID(int(r.destroyed) | (version << entityShift))
 	r.destroyed = EntityID(entt)
 
 	// for pos := len(r.pools); pos > 0; pos-- {
@@ -252,25 +256,6 @@ func (r *Registry) Any(entity EntityID, coms ...ComponentID) bool {
 	return false
 }
 
-// func (r *Registry) ReserveComponent(cap int, coms ...ComponentID) {
-
-// }
-
-// func (r *Registry) managed(componentID ComponentID) bool {
-// 	ctype := r.componentFamily[componentID]
-// 	return ctype < len(r.pools) && r.pools[ctype] != nil
-// }
-
-// // Has check entity has coms set
-// func (r *Registry) Has(entity EntityID, coms ...ComponentID) bool {
-// 	for _, com := range coms {
-// 		if (r.managed(com) && r.getSinglePool(com).Has(entity)) == false {
-// 			return false
-// 		}
-// 	}
-// 	return true
-// }
-
 // Get Returns references to the given components for an entity
 func (r *Registry) Get(entity EntityID, coms ...ComponentID) map[ComponentID]interface{} {
 	if r.Has(entity, coms...) {
@@ -332,7 +317,7 @@ func (r *Registry) Each(fn func(e EntityID)) {
 	} else {
 		for pos := len(r.entities); pos > 0; pos-- {
 			entt := r.entities[pos-1]
-			if (int(entt) & entity_mask) == (pos - 1) {
+			if (int(entt) & entityMask) == (pos - 1) {
 				fn(entt)
 			}
 		}
@@ -394,12 +379,12 @@ func (r *Registry) View(coms ...ComponentID) *View {
 	for _, com := range coms {
 		pools = append(pools, r.pools[com].Storage)
 	}
-	return NewView(pools...)
+	return newView(pools...)
 }
 
 // SingleView by single com
 func (r *Registry) SingleView(com ComponentID) *SingleView {
-	return NewSingleView(r.pools[com].Storage)
+	return newSingleView(r.pools[com].Storage)
 }
 
 // Replace entity com data with newData
@@ -458,9 +443,3 @@ func (p *_PoolHandler) replace(owner *Registry, entity EntityID, data interface{
 		return data
 	})
 }
-
-type _TypeMap map[ComponentID]int
-type _NameMap map[string]int
-
-// DefaultRegistry default registry
-var DefaultRegistry = newRegistry()

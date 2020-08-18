@@ -1,6 +1,6 @@
 package gecs
 
-// extendEntitySlice 扩大slice 的cap
+// extendEntitySlice extend slice cap to newCap
 func extendEntitySlice(slice []EntityID, newCap int) []EntityID {
 	if cap(slice) >= newCap {
 		return slice
@@ -13,7 +13,7 @@ func extendEntitySlice(slice []EntityID, newCap int) []EntityID {
 	return slice
 }
 
-// extendEntitySliceWithValue 扩大slice 的cap
+// extendEntitySliceWithValue extend slice cap to newCap
 func extendEntitySliceWithValue(slice []EntityID, newCap int, value EntityID) []EntityID {
 	if cap(slice) >= newCap {
 		return slice
@@ -30,7 +30,7 @@ func extendEntitySliceWithValue(slice []EntityID, newCap int, value EntityID) []
 	return slice
 }
 
-// extendInterfaceSlice 扩大slice 的cap
+// extendInterfaceSlice extend slice cap to newCap
 func extendInterfaceSlice(slice []interface{}, newCap int) []interface{} {
 	if cap(slice) >= newCap {
 		return slice
@@ -43,7 +43,7 @@ func extendInterfaceSlice(slice []interface{}, newCap int) []interface{} {
 	return slice
 }
 
-// extendInterfaceSliceWithValue 扩大slice 的cap
+// extendInterfaceSliceWithValue extend slice cap to newCap
 func extendInterfaceSliceWithValue(slice []interface{}, newCap int, value interface{}) []interface{} {
 	if cap(slice) >= newCap {
 		return slice
@@ -60,7 +60,7 @@ func extendInterfaceSliceWithValue(slice []interface{}, newCap int, value interf
 	return slice
 }
 
-// extendSparseSetSlice 扩大slice 的cap
+// extendSparseSetSlice extend slice cap to newCap
 func extendSparseSetSlice(slice []*SparseSet, newCap int) []*SparseSet {
 	if cap(slice) >= newCap {
 		return slice
@@ -73,7 +73,7 @@ func extendSparseSetSlice(slice []*SparseSet, newCap int) []*SparseSet {
 	return slice
 }
 
-// extendSparseSetSliceWithValue 扩大slice 的cap
+// extendSparseSetSliceWithValue extend slice cap to newCap
 func extendSparseSetSliceWithValue(slice []*SparseSet, newCap int, value *SparseSet) []*SparseSet {
 	if cap(slice) >= newCap {
 		return slice
@@ -90,7 +90,7 @@ func extendSparseSetSliceWithValue(slice []*SparseSet, newCap int, value *Sparse
 	return slice
 }
 
-// extendPoolHandlerWithValue 扩大slice 的cap
+// extendPoolHandlerWithValue extend slice cap to newCap
 func extendPoolHandlerWithValue(slice []*_PoolHandler, newCap int, constructor func() *_PoolHandler) []*_PoolHandler {
 	if cap(slice) >= newCap {
 		return slice
@@ -107,7 +107,7 @@ func extendPoolHandlerWithValue(slice []*_PoolHandler, newCap int, constructor f
 	return slice
 }
 
-// extend2DEntityArrayWithValue 扩大slice 的cap
+// extend2DEntityArrayWithValue extend slice cap to newCap
 func extend2DEntityArrayWithValue(slice [][]EntityID, newCap int, value []EntityID) [][]EntityID {
 	if cap(slice) >= newCap {
 		return slice

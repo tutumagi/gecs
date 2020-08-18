@@ -17,7 +17,7 @@ type Storage struct {
 func NewStorage(com ComponentID) *Storage {
 	return &Storage{
 		com:       com,
-		SparseSet: NewSparseSet(),
+		SparseSet: newSparseSet(),
 		instances: make([]interface{}, 0),
 	}
 }

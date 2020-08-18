@@ -4,27 +4,13 @@ import (
 	"fmt"
 )
 
-// _EnttPageSize must be a power of two
-const _EnttPageSize int = 2 << 1
-
-// 4 表示目前 entityID使用的 字节树，目前使用的 uint32,4个字节
-const _EnttPerPage int = _EnttPageSize / 4
-
-// EntityID for uint32 entityid
-
-type _VersionType uint16
-type _DifferenceType int64
-
-const entity_mask = 0xFFFFF // 20bits for entity number
-const version_mask = 0xFFF  // 12bits for the version(reset in (0-4095))
-const entity_shift = 20     // 20bits for entity number
-
+// SparseSet a sparse set stored entities
 type SparseSet struct {
 	sparse [][]EntityID
 	packed []EntityID
 }
 
-func NewSparseSet() *SparseSet {
+func newSparseSet() *SparseSet {
 	return &SparseSet{
 		sparse: make([][]EntityID, 0),
 		packed: make([]EntityID, 0),
@@ -36,7 +22,7 @@ func (s *SparseSet) String() string {
 }
 
 func (s *SparseSet) page(entity EntityID) int {
-	return (int(entity) & entity_mask) / _EnttPerPage
+	return (int(entity) & entityMask) / _EnttPerPage
 }
 
 func (s *SparseSet) offset(entity EntityID) int {
@@ -153,6 +139,7 @@ func (s *SparseSet) Reset() {
 	s.packed = s.packed[0:0]
 }
 
+// Begin of the iterator
 func (s *SparseSet) Begin() *_EntityIDIterator {
 	return &_EntityIDIterator{
 		datas: s.packed,
@@ -160,6 +147,7 @@ func (s *SparseSet) Begin() *_EntityIDIterator {
 	}
 }
 
+// End of the iterator
 func (s *SparseSet) End() *_EntityIDIterator {
 	return &_EntityIDIterator{
 		datas: s.packed,
@@ -167,6 +155,7 @@ func (s *SparseSet) End() *_EntityIDIterator {
 	}
 }
 
+// Iterator returns begin of sparse set's iterator
 func (s *SparseSet) Iterator() *_EntityIDIterator {
 	// return &_EntityIDIterator{
 	// 	datas: s.direct,

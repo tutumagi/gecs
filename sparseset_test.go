@@ -7,7 +7,7 @@ import (
 )
 
 func Test_SparseSetEntity(t *testing.T) {
-	s := NewSparseSet()
+	s := newSparseSet()
 	Equal(t, s.Empty(), true)
 	s.Reserve(100)
 	Equal(t, s.Empty(), true)
@@ -41,7 +41,7 @@ type _Data1 struct {
 }
 
 func Test_SparseSwap(t *testing.T) {
-	s := NewSparseSet()
+	s := newSparseSet()
 
 	entity5 := EntityID(5)
 	entity1 := EntityID(1)

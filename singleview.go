@@ -8,7 +8,7 @@ type SingleView struct {
 }
 
 // NewSingleView new single view
-func NewSingleView(pool *Storage) *SingleView {
+func newSingleView(pool *Storage) *SingleView {
 	return &SingleView{
 		Pool: pool,
 	}

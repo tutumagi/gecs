@@ -13,7 +13,7 @@ type View struct {
 	filter []*Storage
 }
 
-func NewView(pools ...*Storage) *View {
+func newView(pools ...*Storage) *View {
 	v := &View{}
 	v.coms = make(map[ComponentID]uint8)
 	v.indexSeq = make([]int, 0, len(pools)-1)

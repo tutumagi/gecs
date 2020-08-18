@@ -11,7 +11,7 @@ func Test_SingleView(t *testing.T) {
 	nameID := ComponentID(1)
 	nameStorage := NewStorage(nameID)
 
-	singleView := NewSingleView(nameStorage)
+	singleView := newSingleView(nameStorage)
 
 	Equal(t, singleView.Empty(), true)
 
