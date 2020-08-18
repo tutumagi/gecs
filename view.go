@@ -61,13 +61,13 @@ func (v *View) unchecked(view *SparseSet) []*SparseSet {
 	return other
 }
 
-func (v *View) get(com *Storage, other *Storage, entity EntityID) interface{} {
-	if com == other {
-		return nil
-	} else {
-		return other.Get(entity)
-	}
-}
+// func (v *View) get(com *Storage, other *Storage, entity EntityID) interface{} {
+// 	if com == other {
+// 		return nil
+// 	} else {
+// 		return other.Get(entity)
+// 	}
+// }
 
 func (v *View) traverse(com ComponentID, fn func(EntityID, map[ComponentID]interface{})) {
 	// checkComInTypes := func() bool {
@@ -185,8 +185,8 @@ func (v *View) empty(coms ...ComponentID) bool {
 		}
 		return maxPool.Size() <= 0
 	} else {
-		for _, pool := range v.Pools {
-			if !pool.Empty() {
+		for _, com := range coms {
+			if !v.getSinglePool(com).Empty() {
 				return false
 			}
 		}
@@ -305,15 +305,6 @@ func (v *View) each(cpool *Storage, fn func(entity EntityID, comDatas map[Compon
 
 	// 	begin.Next()
 	// }
-}
-
-func allOf(pools []*SparseSet, entity EntityID) bool {
-	for _, pool := range pools {
-		if pool.Has(entity) == false {
-			return false
-		}
-	}
-	return true
 }
 
 // Each Iterates entities and components and applies the given function object to them

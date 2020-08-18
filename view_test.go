@@ -26,111 +26,170 @@ func Test_View(t *testing.T) {
 	ageStorage := NewStorage(ageID)
 	countID := ComponentID(3)
 	countStorage := NewStorage(countID)
-	timeID := ComponentID(4)
-	timeStorage := NewStorage(timeID)
+	intSliceID := ComponentID(4)
+	intSliceStorage := NewStorage(intSliceID)
 
-	singleView := newView(nameStorage)
-	multiView := newView(nameStorage, ageStorage, countStorage)
+	nameView := newView(nameStorage)
+	nameAgeCountView := newView(nameStorage, ageStorage, countStorage)
 	nameNotAgeView := newView(nameStorage).withExclude(ageStorage)
-	ageTimeNotCountNameView := newView(ageStorage, timeStorage).withExclude(countStorage, nameStorage)
+	ageIntSliceNotCountNameView := newView(ageStorage, intSliceStorage).withExclude(countStorage, nameStorage)
 
-	Equal(t, singleView.empty(), true)
-	Equal(t, multiView.empty(), true)
-	Equal(t, nameNotAgeView.empty(), true)
-	Equal(t, ageTimeNotCountNameView.empty(), true)
+	t.Run("empty", func(t *testing.T) {
+		Equal(t, nameView.empty(), true)
+		Equal(t, nameAgeCountView.empty(), true)
+		Equal(t, nameNotAgeView.empty(), true)
+		Equal(t, ageIntSliceNotCountNameView.empty(), true)
+
+		Equal(t, nameView.empty(nameID), true)
+		Equal(t, nameAgeCountView.empty(nameID, ageID), true)
+		Equal(t, nameNotAgeView.empty(nameID), true)
+		Equal(t, ageIntSliceNotCountNameView.empty(intSliceID), true)
+	})
 
 	nameEntity := newEntity()
 	nameStorage.Emplace(nameEntity, "nameEntity")
+
 	emptyEntity := newEntity()
-
-	Equal(t, singleView.contains(nameEntity), true)
-	Equal(t, singleView.contains(emptyEntity), false)
-	Equal(t, singleView.size(), 1)
-	Equal(t, singleView.Get(nameEntity, nameID).(string), "nameEntity")
-	PanicMatches(t, func() { singleView.Get(emptyEntity, nameID) }, "view should have entity, but not")
-
-	Equal(t, multiView.contains(nameEntity), false)
-	equalCountView(t, multiView, 0)
-	PanicMatches(t, func() { multiView.Get(nameEntity, nameID) }, "view should have entity, but not")
 
 	nameAgeEntity := newEntity()
 	nameStorage.Emplace(nameAgeEntity, "nameAgeEntity")
-
-	Equal(t, singleView.contains(nameEntity), true)
-	Equal(t, singleView.contains(nameAgeEntity), true)
-	Equal(t, singleView.size(), 2)
-	Equal(t, singleView.Get(nameEntity, nameID).(string), "nameEntity")
-	Equal(t, singleView.Get(nameAgeEntity, nameID).(string), "nameAgeEntity")
-
-	equalCountView(t, multiView, 0)
-	PanicMatches(t, func() { multiView.Get(nameEntity, nameID) }, "view should have entity, but not")
-
-	nameStorage.Destroy(nameEntity)
-
-	Equal(t, singleView.contains(nameEntity), false)
-	Equal(t, singleView.contains(nameAgeEntity), true)
-	Equal(t, singleView.size(), 1)
-	PanicMatches(t, func() { singleView.Get(nameEntity, nameID) }, "view should have entity, but not")
-	Equal(t, singleView.Get(nameAgeEntity, nameID).(string), "nameAgeEntity")
-
-	equalCountView(t, multiView, 0)
-
-	nameAgeCountEntity := newEntity()
-	nameStorage.Emplace(nameAgeCountEntity, "nameAgeCountEntity")
-	ageStorage.Emplace(nameAgeCountEntity, 18)
-	countStorage.Emplace(nameAgeCountEntity, &Count{count: 100})
-
-	equalCountView(t, multiView, 1)
-	Equal(t, multiView.contains(nameAgeCountEntity), true)
-	Equal(t, multiView.Get(nameAgeCountEntity, nameID).(string), "nameAgeCountEntity")
-	Equal(t, multiView.Get(nameAgeCountEntity, ageID).(int), 18)
-	Equal(t, multiView.Get(nameAgeCountEntity, countID).(*Count), &Count{count: 100})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity, nameID, ageID, countID), map[ComponentID]interface{}{
-		nameID:  "nameAgeCountEntity",
-		ageID:   18,
-		countID: &Count{count: 100},
-	})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity, nameID, ageID), map[ComponentID]interface{}{
-		nameID: "nameAgeCountEntity",
-		ageID:  18,
-	})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity, countID, ageID), map[ComponentID]interface{}{
-		ageID:   18,
-		countID: &Count{count: 100},
-	})
+	ageStorage.Emplace(nameAgeEntity, 29)
 
 	nameAgeCountEntity2 := newEntity()
 	nameStorage.Emplace(nameAgeCountEntity2, "nameAgeCountEntity2")
 	ageStorage.Emplace(nameAgeCountEntity2, 22)
 	countStorage.Emplace(nameAgeCountEntity2, &Count{count: 85})
 
-	equalCountView(t, multiView, 2)
-	Equal(t, multiView.contains(nameAgeCountEntity2), true)
-	Equal(t, multiView.Get(nameAgeCountEntity2, nameID).(string), "nameAgeCountEntity2")
-	Equal(t, multiView.Get(nameAgeCountEntity2, ageID).(int), 22)
-	Equal(t, multiView.Get(nameAgeCountEntity2, countID).(*Count), &Count{count: 85})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity2, nameID, ageID, countID), map[ComponentID]interface{}{
-		nameID:  "nameAgeCountEntity2",
-		ageID:   22,
-		countID: &Count{count: 85},
+	ageEntity := newEntity()
+	ageStorage.Emplace(ageEntity, 158)
+
+	ageIntSliceEntity := newEntity()
+	ageStorage.Emplace(ageIntSliceEntity, 89)
+	intSliceStorage.Emplace(ageIntSliceEntity, []int{1, 2, 3})
+
+	nameAgeCountEntity := newEntity()
+	nameStorage.Emplace(nameAgeCountEntity, "nameAgeCountEntity")
+	ageStorage.Emplace(nameAgeCountEntity, 18)
+	countStorage.Emplace(nameAgeCountEntity, &Count{count: 100})
+
+	t.Run("contains", func(t *testing.T) {
+		Equal(t, nameView.contains(nameEntity), true)
+		Equal(t, nameView.contains(emptyEntity), false)
+		Equal(t, nameView.contains(nameAgeEntity), true)
+		Equal(t, nameView.contains(nameAgeCountEntity), true)
+		Equal(t, nameView.contains(nameAgeCountEntity2), true)
+		Equal(t, nameView.contains(ageIntSliceEntity), false)
+		Equal(t, nameView.contains(ageEntity), false)
+
+		Equal(t, nameAgeCountView.contains(nameEntity), false)
+		Equal(t, nameAgeCountView.contains(emptyEntity), false)
+		Equal(t, nameAgeCountView.contains(nameAgeEntity), false)
+		Equal(t, nameAgeCountView.contains(nameAgeCountEntity), true)
+		Equal(t, nameAgeCountView.contains(nameAgeCountEntity2), true)
+		Equal(t, nameAgeCountView.contains(ageIntSliceEntity), false)
+		Equal(t, nameAgeCountView.contains(ageEntity), false)
+
+		Equal(t, nameNotAgeView.contains(nameEntity), true)
+		Equal(t, nameNotAgeView.contains(emptyEntity), false)
+		Equal(t, nameNotAgeView.contains(nameAgeEntity), false)
+		Equal(t, nameNotAgeView.contains(nameAgeCountEntity), false)
+		Equal(t, nameNotAgeView.contains(nameAgeCountEntity2), false)
+		Equal(t, nameNotAgeView.contains(ageIntSliceEntity), false)
+		Equal(t, nameNotAgeView.contains(ageEntity), false)
+
+		Equal(t, ageIntSliceNotCountNameView.contains(nameEntity), false)
+		Equal(t, ageIntSliceNotCountNameView.contains(emptyEntity), false)
+		Equal(t, ageIntSliceNotCountNameView.contains(nameAgeCountEntity), false)
+		Equal(t, ageIntSliceNotCountNameView.contains(nameAgeCountEntity2), false)
+		Equal(t, ageIntSliceNotCountNameView.contains(ageIntSliceEntity), true)
+		Equal(t, ageIntSliceNotCountNameView.contains(ageEntity), false)
 	})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity2, nameID, ageID), map[ComponentID]interface{}{
-		nameID: "nameAgeCountEntity2",
-		ageID:  22,
+
+	t.Run("size", func(t *testing.T) {
+		Equal(t, nameView.size() > 0, true)
+
+		Equal(t, nameAgeCountView.size() > 0, true)
+
+		Equal(t, nameNotAgeView.size() > 0, true)
+
+		Equal(t, ageIntSliceNotCountNameView.size() > 0, true)
 	})
-	Equal(t, multiView.GetMulti(nameAgeCountEntity2, countID, ageID), map[ComponentID]interface{}{
-		ageID:   22,
-		countID: &Count{count: 85},
+
+	t.Run("normalGet", func(t *testing.T) {
+		Equal(t, nameView.Get(nameEntity, nameID).(string), "nameEntity")
+		Equal(t, nameView.Get(nameAgeCountEntity, nameID).(string), "nameAgeCountEntity")
+		Equal(t, nameView.Get(nameAgeCountEntity2, nameID).(string), "nameAgeCountEntity2")
+
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity, nameID).(string), "nameAgeCountEntity")
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity, ageID).(int), 18)
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity, countID).(*Count), &Count{count: 100})
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity2, nameID).(string), "nameAgeCountEntity2")
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity2, ageID).(int), 22)
+		Equal(t, nameAgeCountView.Get(nameAgeCountEntity2, countID).(*Count), &Count{count: 85})
+
+		Equal(t, nameNotAgeView.Get(nameEntity, nameID).(string), "nameEntity")
+
+		Equal(t, ageIntSliceNotCountNameView.Get(ageIntSliceEntity, ageID).(int), 89)
+		Equal(t, ageIntSliceNotCountNameView.Get(ageIntSliceEntity, intSliceID).([]int), []int{1, 2, 3})
 	})
+
+	t.Run("panicGet", func(t *testing.T) {
+		PanicMatches(t, func() { nameView.Get(ageIntSliceEntity, nameID) }, "view should have entity, but not")
+		PanicMatches(t, func() { nameView.Get(ageEntity, nameID) }, "view should have entity, but not")
+		PanicMatches(t, func() { nameView.Get(emptyEntity, nameID) }, "view should have entity, but not")
+
+		PanicMatches(t, func() { nameAgeCountView.Get(emptyEntity, ageID) }, "view should have entity, but not")
+		PanicMatches(t, func() { nameAgeCountView.Get(nameEntity, nameID) }, "view should have entity, but not")
+		PanicMatches(t, func() { nameAgeCountView.Get(ageIntSliceEntity, ageID) }, "view should have entity, but not")
+		PanicMatches(t, func() { nameAgeCountView.Get(ageEntity, countID) }, "view should have entity, but not")
+
+		PanicMatches(t, func() { nameNotAgeView.Get(nameAgeCountEntity2, nameID) }, "view should have entity, but not")
+
+		PanicMatches(t, func() { ageIntSliceNotCountNameView.Get(nameAgeCountEntity2, ageID) }, "view should have entity, but not")
+		PanicMatches(t, func() { ageIntSliceNotCountNameView.Get(ageEntity, intSliceID) }, "view should have entity, but not")
+	})
+
+	t.Run("eachCount", func(t *testing.T) {
+		equalCountView(t, nameView, 4)
+		equalCountView(t, nameAgeCountView, 2)
+		equalCountView(t, nameNotAgeView, 1)
+		equalCountView(t, ageIntSliceNotCountNameView, 1)
+	})
+
+	t.Run("multiGet", func(t *testing.T) {
+		Equal(t, nameView.GetMulti(nameEntity, nameID), map[ComponentID]interface{}{nameID: "nameEntity"})
+		Equal(t, nameView.GetMulti(nameAgeCountEntity, nameID), map[ComponentID]interface{}{nameID: "nameAgeCountEntity"})
+		Equal(t, nameView.GetMulti(nameAgeCountEntity2, nameID), map[ComponentID]interface{}{nameID: "nameAgeCountEntity2"})
+
+		Equal(t, nameAgeCountView.GetMulti(nameAgeCountEntity, nameID), map[ComponentID]interface{}{nameID: "nameAgeCountEntity"})
+		Equal(t, nameAgeCountView.GetMulti(nameAgeCountEntity, ageID), map[ComponentID]interface{}{ageID: 18})
+		Equal(t, nameAgeCountView.GetMulti(nameAgeCountEntity, countID), map[ComponentID]interface{}{countID: &Count{count: 100}})
+		Equal(t, nameAgeCountView.GetMulti(nameAgeCountEntity2, nameID, ageID, countID), map[ComponentID]interface{}{
+			nameID:  "nameAgeCountEntity2",
+			ageID:   22,
+			countID: &Count{count: 85},
+		})
+
+		Equal(t, nameNotAgeView.GetMulti(nameEntity, nameID), map[ComponentID]interface{}{nameID: "nameEntity"})
+
+		Equal(t, ageIntSliceNotCountNameView.GetMulti(ageIntSliceEntity, ageID),
+			map[ComponentID]interface{}{ageID: 89})
+		Equal(t, ageIntSliceNotCountNameView.GetMulti(ageIntSliceEntity, intSliceID),
+			map[ComponentID]interface{}{intSliceID: []int{1, 2, 3}})
+		Equal(t, ageIntSliceNotCountNameView.GetMulti(ageIntSliceEntity, intSliceID, ageID),
+			map[ComponentID]interface{}{
+				intSliceID: []int{1, 2, 3},
+				ageID:      89},
+		)
+
+	})
+
+	nameStorage.Destroy(nameEntity)
 
 	ageStorage.Destroy(nameAgeCountEntity2)
-	Equal(t, multiView.size(), 1)
-	Equal(t, multiView.contains(nameAgeCountEntity2), false)
-	equalCountView(t, multiView, 1)
-	PanicMatches(t, func() { multiView.GetMulti(nameAgeCountEntity2, nameID, ageID, countID) }, "view should have entity, but not")
 
 	nameStorage.Destroy(nameAgeCountEntity)
-	equalCountView(t, multiView, 0)
+
 }
 
 func equalCountView(t *testing.T, view *View, count int) {
