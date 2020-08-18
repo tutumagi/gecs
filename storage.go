@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 // Storage 单个类型组件绑定实体的稀疏数组
 type Storage struct {

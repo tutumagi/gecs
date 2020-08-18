@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 import (
 	"testing"
@@ -116,7 +116,7 @@ func Test_View(t *testing.T) {
 	equalCountView(t, multiView, 0)
 }
 
-func equalCountView(t *testing.T, view IteratorView, count int) {
+func equalCountView(t *testing.T, view *View, count int) {
 	cal := 0
 	view.Each(func(entity EntityID, datas map[ComponentID]interface{}) {
 		cal++

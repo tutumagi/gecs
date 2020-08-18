@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 type IIterator interface {
 	Prev() IIterator

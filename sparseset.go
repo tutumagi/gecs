@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 import (
 	"fmt"
@@ -35,12 +35,12 @@ func (s *SparseSet) String() string {
 	return fmt.Sprintf("<SparseSet>(packed:%+v, sparse:%+v)", s.packed, s.sparse)
 }
 
-func (s *SparseSet) page(entityID EntityID) int {
-	return (int(entityID) & entity_mask) / _EnttPerPage
+func (s *SparseSet) page(entity EntityID) int {
+	return (int(entity) & entity_mask) / _EnttPerPage
 }
 
-func (s *SparseSet) offset(entityID EntityID) int {
-	return int(entityID) & (_EnttPerPage - 1)
+func (s *SparseSet) offset(entity EntityID) int {
+	return int(entity) & (_EnttPerPage - 1)
 }
 
 func (s *SparseSet) assure(pos int) []EntityID {
@@ -89,11 +89,11 @@ func (s *SparseSet) Has(entity EntityID) bool {
 }
 
 // Index returns the position of an entity in a sparse set.
-func (s *SparseSet) Index(entityID EntityID) int {
-	if !s.Has(entityID) {
-		panic(fmt.Sprintf("should have the entity %v", entityID))
-	}
-	return int(s.sparse[s.page(entityID)][s.offset(entityID)])
+func (s *SparseSet) Index(entity EntityID) int {
+	// if !s.Has(entity) {
+	// 	panic(fmt.Sprintf("should have the entity %v", entity))
+	// }
+	return int(s.sparse[s.page(entity)][s.offset(entity)])
 }
 
 // Emplace assign an entity to a sparse set

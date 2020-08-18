@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 // extendEntitySlice 扩大slice 的cap
 func extendEntitySlice(slice []EntityID, newCap int) []EntityID {
@@ -90,18 +90,18 @@ func extendSparseSetSliceWithValue(slice []*SparseSet, newCap int, value *Sparse
 	return slice
 }
 
-// extendPoolWithValue 扩大slice 的cap
-func extendPoolWithValue(slice []*_Pool, newCap int, value *_Pool) []*_Pool {
+// extendPoolHandlerWithValue 扩大slice 的cap
+func extendPoolHandlerWithValue(slice []*_PoolHandler, newCap int, constructor func() *_PoolHandler) []*_PoolHandler {
 	if cap(slice) >= newCap {
 		return slice
 	}
 	oldLen := len(slice)
-	newSlice := make([]*_Pool, len(slice), newCap)
+	newSlice := make([]*_PoolHandler, len(slice), newCap)
 	copy(newSlice, slice)
 	slice = newSlice
 
 	for i := oldLen; i < cap(slice); i++ {
-		slice = append(slice, value)
+		slice = append(slice, constructor())
 	}
 
 	return slice

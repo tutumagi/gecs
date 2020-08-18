@@ -1,4 +1,4 @@
-package entt
+package gecs
 
 import (
 	"testing"
