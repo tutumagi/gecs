@@ -1,6 +1,6 @@
 ## Gecs
 
-#### An [EnTT](https://github.com/skypjack/entt) implement with golang.
+#### An [EnTT](https://github.com/skypjack/entt) implement with golang. (use the amazing ecs implement [Entt](https://github.com/skypjack/entt) if you code cpp.)
 
 [![Build Status](https://travis-ci.com/tutumagi/gecs.svg?branch=master)](https://travis-ci.com/tutumagi/gecs) 
 [![codecov](https://codecov.io/gh/tutumagi/gecs/branch/master/graph/badge.svg)](https://codecov.io/gh/tutumagi/gecs)
