@@ -15,8 +15,9 @@ type Registry struct {
 	checkComponentFamily _KVStrInt
 }
 
-func newRegistry() *Registry {
-	return &Registry{
+// NewRegistry new registry instance
+func NewRegistry() *Registry {
+	r := &Registry{
 		pools:    make([]*_PoolHandler, 0),
 		entities: make([]EntityID, 0, 1<<19), // 最多同时52w 左右个实体
 
@@ -24,6 +25,7 @@ func newRegistry() *Registry {
 
 		destroyed: DefaultPlaceholder,
 	}
+	return r
 }
 
 // SizeOfCom  Returns the number of existing components of the given type.
@@ -132,9 +134,13 @@ func (r *Registry) Create() EntityID {
 		entt = EntityID(len(r.entities))
 		r.entities = append(r.entities, entt)
 	} else {
-		curr := int(r.destroyed)
-		version := int(r.entities[curr]) & (versionMask << entityShift)
-		r.destroyed = EntityID(int(r.entities[curr]) & entityMask)
+
+		curr := r.destroyed.toInt()
+		version := r.entities[curr].toInt() & (versionMask << entityShift)
+		r.destroyed = EntityID(r.entities[curr].toInt() & entityMask)
+		if r.destroyed == 0 {
+			r.destroyed = DefaultPlaceholder
+		}
 		entt = EntityID(curr | version)
 		r.entities[curr] = entt
 	}

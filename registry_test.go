@@ -22,7 +22,7 @@ var PositionID ComponentID
 var MapIntIntID ComponentID
 
 func initRegistry() *Registry {
-	registry := newRegistry()
+	registry := NewRegistry()
 
 	NameID = registry.RegisterComponent("name", false)
 	AgeID = registry.RegisterComponent("age", false)
@@ -147,6 +147,30 @@ func Test_RegistryCreateAndDestroy(t *testing.T) {
 		// printAge(t, registry)
 		// printPosition(t, registry)
 	}
+}
+
+func Test_RegistryEnttIDReuse(t *testing.T) {
+	registry := initRegistry()
+
+	entity0 := registry.Create()
+	entity1 := registry.Create()
+
+	entity2 := registry.Create()
+
+	registry.Destroy(entity0)
+	registry.Destroy(entity1)
+	registry.Destroy(entity2)
+
+	entity3 := registry.Create()
+	entity4 := registry.Create()
+	entity5 := registry.Create()
+	entity6 := registry.Create()
+
+	registry.Destroy(entity3)
+	registry.Destroy(entity4)
+	registry.Destroy(entity5)
+	registry.Destroy(entity6)
+
 }
 
 func Test_Assign(t *testing.T) {

@@ -8,15 +8,21 @@ import (
 // EntityID entity runtime id
 type EntityID uint32
 
+// DefaultPlaceholder default entity id
+const DefaultPlaceholder EntityID = math.MaxUint32
+
+func (e EntityID) toInt() int {
+	if e == DefaultPlaceholder {
+		return 0
+	}
+	return int(e)
+}
 func (e EntityID) String() string {
 	if DefaultPlaceholder == e {
 		return "^"
 	}
 	return strconv.FormatUint(uint64(e), 10)
 }
-
-// DefaultPlaceholder default entity id
-const DefaultPlaceholder EntityID = math.MaxUint32
 
 // ComponentID component runtime id
 type ComponentID uint32
