@@ -533,6 +533,40 @@ func Test_Contains(t *testing.T) {
 
 }
 
+func Test_Each(t *testing.T) {
+	registry := initRegistry()
+	entity0 := registry.Create()
+	entity1 := registry.Create()
+	entity2 := registry.Create()
+	entity3 := registry.Create()
+
+	entities := []EntityID{
+		entity0,
+		entity1,
+		entity2,
+		entity3,
+	}
+	idx := len(entities) - 1
+	registry.Each(func(e EntityID) {
+		Equal(t, e, entities[idx])
+		idx--
+	})
+
+	registry.Destroy(entity0)
+
+	registry.Each(func(e EntityID) {
+		NotEqual(t, e, entity0)
+	})
+
+	registry.Create()
+
+	idx = len(entities) - 1
+	registry.Each(func(e EntityID) {
+		Equal(t, e&entityMask, entities[idx])
+		idx--
+	})
+}
+
 func equalCount(t *testing.T, registry *Registry, count int, coms ...ComponentID) {
 	cal := 0
 	registry.View(coms...).Each(func(entity EntityID, datas map[ComponentID]interface{}) {

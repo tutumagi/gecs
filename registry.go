@@ -124,77 +124,50 @@ func (r *Registry) Current(entity EntityID) int {
 
 // Create a new entity and return it
 // There are two kinds of possible entity identifiers:
-//
+//	whether if an entity id is valid or not. Please check Registry.Valid method
 //	* Newly created ones in case no entities have been previously destroyed.
 //	* Recycled ones with updated versions.
 func (r *Registry) Create() EntityID {
 
 	var entt EntityID
+	// If there is no destroyed entityID, just append new one
 	if r.destroyed == DefaultPlaceholder {
 		entt = EntityID(len(r.entities))
 		r.entities = append(r.entities, entt)
 	} else {
-
+		// If there is a destroyed entityID
+		// 1. find it entityID value
 		curr := r.destroyed.toInt()
+		// 2. find it version
 		version := r.entities[curr].toInt() & (versionMask << entityShift)
+		// 3. update destroyed id
 		r.destroyed = EntityID(r.entities[curr].toInt() & entityMask)
 		if r.destroyed == 0 {
 			r.destroyed = DefaultPlaceholder
 		}
+		// 4. combine last destroyed id and the id's version
 		entt = EntityID(curr | version)
+		// 5. put the new entt to entities slice
 		r.entities[curr] = entt
 	}
 
 	return entt
-	// var entity EntityID
-	// if r.available > 0 {
-	// 	// 有实体销毁时，复用该entityID，更新 Version
-	// 	entt := r.next
-	// 	// 拿到已经被销毁的entt的 version
-	// 	version := r.entities[int(entt)] & (version_mask << entity_shift)
-	// 	r.next = r.entities[int(entt)] & entity_mask
-	// 	entity = entt | version
-	// 	r.entities[int(entt)] = entity
-	// 	r.available--
-	// } else {
-	// 	// 在没有任何实体销毁(destroy)时
-	// 	entity = EntityID(len(r.entities))
-	// 	r.entities = append(r.entities, entity)
-	// }
-
-	// return entity
 }
 
 // Destroy an entity
 func (r *Registry) Destroy(entity EntityID) {
+	// 1. find destroyed entityID version, and +1
 	version := int(entity)>>entityShift + 1
-
+	// 2. remove all components data associated with the entity
 	r.RemoveAll(entity)
 
-	// lengthens the implicit list of destroyed entities
+	// 3. find the entity id
 	entt := int(entity) & entityMask
-	r.entities[entt] = EntityID(int(r.destroyed) | (version << entityShift))
+	// 4. combine the last destroyed id and version. then put it to the destroying id index in entities.
+	//		So we can use (r.entities[entt] & entityMask != DefaultPlaceholder) to decide whether the entity is valid or not
+	r.entities[entt] = EntityID(int(r.destroyed.toInt()) | (version << entityShift))
+	// 5. put the entity id to destroyed field
 	r.destroyed = EntityID(entt)
-
-	// for pos := len(r.pools); pos > 0; pos-- {
-	// 	pool := r.pools[pos-1]
-	// 	if pool != nil && pool.Has(entity) {
-	// 		pool.remove(r, entity)
-	// 	}
-	// }
-
-	// // lengthens the implicit list of destroyed entities
-	// entt := entity & entity_mask
-	// // 该实体版本号 +1 后的数据
-	// version := ((entity >> entity_shift) + 1) << entity_shift
-	// node := r.next
-	// // 如果没有可用的 entity时，则更新版本号（使用上面算好的值）
-	// if r.available == 0 {
-	// 	node = ((entt + 1) & entity_mask) | version
-	// }
-	// r.entities[entt] = node
-	// r.next = entt
-	// r.available++
 }
 
 // Assign the given component data to an entity
@@ -303,15 +276,19 @@ func (r *Registry) TryGetSingle(entity EntityID, com ComponentID) interface{} {
 
 // Clear a whole registry or the pools for the given components
 func (r *Registry) Clear(coms ...ComponentID) {
-	// if len(coms) == 0 {
+	if len(coms) == 0 {
+		for _, entt := range r.entities {
+			r.Destroy(entt)
+		}
+	} else {
+		for _, com := range coms {
+			p := r.pools[com]
 
-	// } else {
-	// 	for _, com := range coms {
-	// 		p := r.pools[com]
-
-	// 		p.pool.SparseSet.be
-	// 	}
-	// }
+			Each(p.SparseSet.Iterator(), func(data interface{}) {
+				p.remove(r, data.(EntityID))
+			})
+		}
+	}
 }
 
 // Each Iterates all the entities that are still in use
@@ -323,6 +300,7 @@ func (r *Registry) Each(fn func(e EntityID)) {
 	} else {
 		for pos := len(r.entities); pos > 0; pos-- {
 			entt := r.entities[pos-1]
+			// skip destroyed entity
 			if (int(entt) & entityMask) == (pos - 1) {
 				fn(entt)
 			}
