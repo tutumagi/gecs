@@ -1,7 +1,6 @@
 package gecs
 
 import (
-	"math"
 	"strconv"
 )
 
@@ -9,12 +8,9 @@ import (
 type EntityID uint32
 
 // DefaultPlaceholder default entity id
-const DefaultPlaceholder EntityID = math.MaxUint32
+const DefaultPlaceholder EntityID = entityMask
 
 func (e EntityID) toInt() int {
-	if e == DefaultPlaceholder {
-		return 0
-	}
 	return int(e)
 }
 func (e EntityID) String() string {

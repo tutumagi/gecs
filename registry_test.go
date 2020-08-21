@@ -567,6 +567,53 @@ func Test_Each(t *testing.T) {
 	})
 }
 
+func Test_Clear(t *testing.T) {
+	registry := initRegistry()
+	entity0 := registry.Create()
+	entity1 := registry.Create()
+	entity2 := registry.Create()
+	entity3 := registry.Create()
+	Equal(t, registry.Valid(entity0), true)
+	Equal(t, registry.Valid(entity1), true)
+	Equal(t, registry.Valid(entity2), true)
+	Equal(t, registry.Valid(entity3), true)
+	Equal(t, registry.Alive(), 4)
+	Equal(t, registry.Size(), 4)
+
+	registry.Destroy(entity0)
+	Equal(t, registry.Valid(entity0), false)
+	Equal(t, registry.Valid(entity1), true)
+	Equal(t, registry.Valid(entity2), true)
+	Equal(t, registry.Valid(entity3), true)
+	Equal(t, registry.Size(), 4)
+	Equal(t, registry.Alive(), 3)
+
+	registry.Destroy(entity1)
+	Equal(t, registry.Valid(entity0), false)
+	Equal(t, registry.Valid(entity1), false)
+	Equal(t, registry.Valid(entity2), true)
+	Equal(t, registry.Valid(entity3), true)
+	Equal(t, registry.Size(), 4)
+	Equal(t, registry.Alive(), 2)
+
+	registry.Clear()
+	Equal(t, registry.Valid(entity0), false)
+	Equal(t, registry.Valid(entity1), false)
+	Equal(t, registry.Valid(entity2), false)
+	Equal(t, registry.Valid(entity3), false)
+	Equal(t, registry.Size(), 4)
+	Equal(t, registry.Alive(), 0)
+
+	entity5 := registry.Create()
+	Equal(t, registry.Valid(entity0), false)
+	Equal(t, registry.Valid(entity1), false)
+	Equal(t, registry.Valid(entity2), false)
+	Equal(t, registry.Valid(entity3), false)
+	Equal(t, registry.Valid(entity5), true)
+	Equal(t, registry.Size(), 4)
+	Equal(t, registry.Alive(), 1)
+}
+
 func equalCount(t *testing.T, registry *Registry, count int, coms ...ComponentID) {
 	cal := 0
 	registry.View(coms...).Each(func(entity EntityID, datas map[ComponentID]interface{}) {

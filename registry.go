@@ -42,8 +42,8 @@ func (r *Registry) Size() int {
 func (r *Registry) Alive() int {
 	sz := len(r.entities)
 	curr := r.destroyed
-	for ; curr != DefaultPlaceholder; sz-- {
-		curr = r.entities[int(curr)&entityMask]
+	for ; curr&entityMask != DefaultPlaceholder; sz-- {
+		curr = r.entities[curr.toInt()&entityMask]
 	}
 
 	return sz
@@ -277,9 +277,9 @@ func (r *Registry) TryGetSingle(entity EntityID, com ComponentID) interface{} {
 // Clear a whole registry or the pools for the given components
 func (r *Registry) Clear(coms ...ComponentID) {
 	if len(coms) == 0 {
-		for _, entt := range r.entities {
-			r.Destroy(entt)
-		}
+		r.Each(func(e EntityID) {
+			r.Destroy(e)
+		})
 	} else {
 		for _, com := range coms {
 			p := r.pools[com]
