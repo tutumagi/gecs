@@ -199,3 +199,11 @@ func equalCountView(t *testing.T, view *View, count int) {
 	})
 	EqualSkip(t, 2, cal, count)
 }
+
+func equalCountSingleView(t *testing.T, view *SingleView, count int) {
+	cal := 0
+	view.Each(func(entity EntityID, datas map[ComponentID]interface{}) {
+		cal++
+	})
+	EqualSkip(t, 2, cal, count)
+}

@@ -173,6 +173,30 @@ func Test_RegistryEnttIDReuse(t *testing.T) {
 
 }
 
+func Test_EntityCountLimit(t *testing.T) {
+	registry := initRegistry()
+
+	entities := make([]EntityID, 0, 1<<20)
+	for i := 0; i < cap(entities); i++ {
+		eid := registry.Create()
+		registry.Assign(eid, NameID, "tutu")
+		entities = append(entities, eid)
+	}
+	Equal(t, registry.SizeOfCom(NameID), cap(entities))
+	for _, eid := range entities {
+		registry.Destroy(eid)
+	}
+	entities = entities[0:0]
+	Equal(t, registry.SizeOfCom(NameID), len(entities))
+	equalCountSingleView(t, registry.SingleView(NameID), 0)
+	for i := 0; i < cap(entities); i++ {
+		entities = append(entities, registry.Create())
+	}
+	for _, eid := range entities {
+		registry.Destroy(eid)
+	}
+}
+
 func Test_Assign(t *testing.T) {
 	registry := initRegistry()
 	entity0 := registry.Create()
