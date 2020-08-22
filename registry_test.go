@@ -24,10 +24,10 @@ var MapIntIntID ComponentID
 func initRegistry() *Registry {
 	registry := NewRegistry()
 
-	NameID = registry.RegisterComponent("name", false)
-	AgeID = registry.RegisterComponent("age", false)
-	PositionID = registry.RegisterComponent("position", false)
-	MapIntIntID = registry.RegisterComponent("mapintint", false)
+	NameID = registry.RegisterComponent("name")
+	AgeID = registry.RegisterComponent("age")
+	PositionID = registry.RegisterComponent("position")
+	MapIntIntID = registry.RegisterComponent("mapintint")
 
 	return registry
 }

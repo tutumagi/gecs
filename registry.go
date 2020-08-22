@@ -335,7 +335,7 @@ func (r *Registry) Orphan(entity EntityID) bool {
 
 // RegisterComponent register component by name, name should unique
 //	like entt's register.assure
-func (r *Registry) RegisterComponent(name string, persistent bool) ComponentID {
+func (r *Registry) RegisterComponent(name string) ComponentID {
 	if _, ok := r.checkComponentFamily[name]; ok {
 		panic(fmt.Sprintf("register same name component %v", name))
 		// return ComponentID(tid)

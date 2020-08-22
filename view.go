@@ -104,16 +104,16 @@ func (v *View) traverse(com ComponentID, fn func(EntityID, map[ComponentID]inter
 }
 
 func (v *View) iterator(fn func(), coms ...ComponentID) {
-	view, _ := v.candicate()
-	last := view.Iterator().End()
-	first := view.Iterator().Begin()
+	// view, _ := v.candicate()
+	// last := view.Iterator().End()
+	// first := view.Iterator().Begin()
 
-	for first != last {
-		entt := first.Data().(EntityID)
-		if v.inAllInclude(entt) && !v.inExclude(entt) {
+	// for first != last {
+	// 	entt := first.Data().(EntityID)
+	// 	if v.inAllInclude(entt) && !v.inExclude(entt) {
 
-		}
-	}
+	// 	}
+	// }
 }
 
 // inExclude check whether the entity in at least one filter component storage
@@ -138,6 +138,7 @@ func (v *View) inAllInclude(entity EntityID) bool {
 	return true
 }
 
+// inSpecify
 func (v *View) inSpecify(com ComponentID, entity EntityID) bool {
 	if _, ok := v.coms[com]; ok {
 		return true
@@ -197,20 +198,6 @@ func (v *View) empty(coms ...ComponentID) bool {
 // contains check if a view contains an entity
 func (v *View) contains(entity EntityID) bool {
 	return v.inAllInclude(entity) && !v.inExclude(entity)
-	// sz := int(entity & entity_mask)
-	// extent := v.minExtent()
-
-	// if sz < extent {
-	// 	for _, pool := range v.Pools {
-	// 		if pool.Has(entity) && pool.Data()[pool.SparseSet.Index(entity)] == entity {
-	// 		} else {
-	// 			return false
-	// 		}
-	// 	}
-	// 	return true
-	// } else {
-	// 	return false
-	// }
 }
 
 func (v *View) minExtent() int {
@@ -245,66 +232,7 @@ func (v *View) GetMulti(entity EntityID, coms ...ComponentID) map[ComponentID]in
 }
 
 func (v *View) each(cpool *Storage, fn func(entity EntityID, comDatas map[ComponentID]interface{})) {
-
 	v.traverse(cpool.com, fn)
-	// other := v.unchecked(cpool.SparseSet)
-	// minExtend := v.minExtent()
-
-	// datas := make([]*_EntityIDIterator, 0, len(v.indexSeq))
-	// for _, idx := range v.indexSeq {
-	// 	datas = append(datas, other[idx].Begin())
-	// }
-	// raw := make([]*ComponentIterator, 0, len(v.Pools))
-	// for _, pool := range v.Pools {
-	// 	raw = append(raw, pool.Begin())
-	// }
-
-	// end := cpool.SparseSet.End()
-	// begin := cpool.SparseSet.Iterator()
-
-	// for !begin.Equal(IIterator(end)) {
-	// 	ordered := true
-	// 	for _, data := range datas {
-	// 		if data.Data() != begin.Data() {
-	// 			ordered = false
-	// 			break
-	// 		}
-	// 	}
-
-	// 	if ordered {
-	// 		comDatas := make(map[ComponentID]interface{}, len(v.Pools))
-	// 		entity := begin.Data().(EntityID)
-	// 		for idx, rawData := range raw {
-	// 			comDatas[v.Pools[idx].com] = rawData.Data()
-	// 		}
-
-	// 		fn(entity, comDatas)
-
-	// 		begin.Next()
-	// 	} else {
-	// 		break
-	// 	}
-	// }
-
-	// for !begin.Equal(IIterator(end)) {
-
-	// 	entity := begin.Data().(EntityID)
-	// 	// it := cpool.Begin()
-	// 	sz := int(entity & entity_mask) // entity index
-
-	// 	if sz < minExtend && allOf(other, entity) {
-	// 		comDatas := make(map[ComponentID]interface{}, len(v.Pools))
-	// 		for _, pool := range v.Pools {
-	// 			if pool.Has(entity) {
-	// 				comDatas[pool.com] = pool.Get(entity)
-	// 			}
-	// 		}
-
-	// 		fn(entity, comDatas)
-	// 	}
-
-	// 	begin.Next()
-	// }
 }
 
 // Each Iterates entities and components and applies the given function object to them

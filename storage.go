@@ -79,7 +79,7 @@ func (s *Storage) Replace(entity EntityID, data interface{}) interface{} {
 // Reset 组件稀疏数组，以及实体稀疏数组
 func (s *Storage) Reset() {
 	s.SparseSet.Reset()
-	s.instances = make([]interface{}, 0)
+	s.instances = s.instances[0:0]
 }
 
 // Begin 组件的迭代器
