@@ -16,24 +16,32 @@ As go does not support generic now. So we should add extra info to identify diff
 
 ## Getting Started
 
+`go get github.com/tutumagi/gecs`
+
 ## Example
 
 ```go
-// pre define your component data
+package main
+
+import (
+	"fmt"
+	"github.com/tutumagi/gecs"
+)
+// pre define your component data type
 type Name string
 type Age int
 type Position struct {
-    X int
-    Y int
-    Z int
+	X int
+	Y int
+	Z int
 }
 
 func main() {
-    // create a registry
-    	registry := NewRegistry()
+	// create a registry
+	registry := gecs.NewRegistry()
 
-    // register all components what you will use later
-    // It's to identify component type
+	// register all components what you will use later
+	// It's to identify component type
 	NameID := registry.RegisterComponent("name")
 	AgeID := registry.RegisterComponent("age")
 	PositionID := registry.RegisterComponent("position")
@@ -46,12 +54,12 @@ func main() {
 	registry.Assign(entity, AgeID, Age(12))
 
 	// check whether an entity has given components data or not
-	registry.Has(entity, NameID)        // true
-	registry.Has(entity, NameID, AgeID) // true
-	registry.Has(entity, PositionID)    // false
+	fmt.Printf("entity %v has <Name>: %v\n", entity, registry.Has(entity, NameID))              // true
+	fmt.Printf("entity %v has <Name & Age>: %v\n", entity, registry.Has(entity, NameID, AgeID)) // true
+	fmt.Printf("entity %v has <Position>: %v\n", entity, registry.Has(entity, PositionID))      // false
 
 	// iterator entities by givin component
-	registry.View(NameID, AgeID).Each(func(entity EntityID, datas map[ComponentID]interface{}) {
+	registry.View(NameID, AgeID).Each(func(entity gecs.EntityID, datas map[gecs.ComponentID]interface{}) {
 		name := datas[NameID].(Name) // the component type bind componentID must be consistent with you assign before
 		age := datas[AgeID].(Age)
 
@@ -59,6 +67,7 @@ func main() {
 		fmt.Printf("age is %v\n", age)
 	})
 }
+
 ```
 
 ## Prerequisites
@@ -79,4 +88,4 @@ GO 1.14 and above
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
