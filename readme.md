@@ -16,6 +16,8 @@ As go does not support generic now. So we should add extra info to identify diff
 
 ## Getting Started
 
+## Example
+
 ```go
 // pre define your component data
 type Name string
@@ -45,8 +47,8 @@ func main() {
 
 	// check whether an entity has given components data or not
 	registry.Has(entity, NameID)        // true
-    registry.Has(entity, NameID, AgeID) // true
-    registry.Has(entity, PositionID)    // false
+	registry.Has(entity, NameID, AgeID) // true
+	registry.Has(entity, PositionID)    // false
 
 	// iterator entities by givin component
 	registry.View(NameID, AgeID).Each(func(entity EntityID, datas map[ComponentID]interface{}) {
