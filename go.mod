@@ -1,4 +1,4 @@
-module gecs
+module github.com/tutumagi/gecs
 
 go 1.14
 
