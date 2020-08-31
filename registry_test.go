@@ -16,19 +16,13 @@ type Position struct {
 }
 type MapIntInt map[int32]int32
 
-var NameID ComponentID
-var AgeID ComponentID
-var PositionID ComponentID
-var MapIntIntID ComponentID
+var NameID ComponentID = RegisterComponent("name")
+var AgeID ComponentID = RegisterComponent("age")
+var PositionID ComponentID = RegisterComponent("position")
+var MapIntIntID ComponentID = RegisterComponent("mapintint")
 
 func initRegistry() *Registry {
 	registry := NewRegistry()
-
-	NameID = registry.RegisterComponent("name")
-	AgeID = registry.RegisterComponent("age")
-	PositionID = registry.RegisterComponent("position")
-	MapIntIntID = registry.RegisterComponent("mapintint")
-
 	return registry
 }
 

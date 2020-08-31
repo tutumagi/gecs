@@ -6,26 +6,46 @@ import (
 
 // Registry of one independent ecs system
 type Registry struct {
-	pools    []*_PoolHandler
+	// component pools
+	pools []*_PoolHandler
+	// all entities
 	entities []EntityID
+	// context data
+	// vars []interface{}
+	vars map[int]interface{}
 
 	destroyed EntityID
 
 	// componentName -> componentID
-	checkComponentFamily _KVStrInt
+	// checkComponentFamily _KVStrInt
 }
 
 // NewRegistry new registry instance
 func NewRegistry() *Registry {
 	r := &Registry{
-		pools:    make([]*_PoolHandler, 0),
+		// pools:    make([]*_PoolHandler, 0),
 		entities: make([]EntityID, 0, 1<<19), // 最多同时52w 左右个实体
+		// vars:     make(map[int]interface{}, 32),
 
-		checkComponentFamily: make(_KVStrInt, 0),
+		// checkComponentFamily: make(_KVStrInt, 0),
 
 		destroyed: DefaultPlaceholder,
 	}
+	r.registerComponent()
 	return r
+}
+
+// RegisterComponent register component
+func (r *Registry) registerComponent() {
+	r.pools = make([]*_PoolHandler, len(checkComponentFamily))
+	for i := 0; i < len(checkComponentFamily); i++ {
+		r.pools[i] = newPool(ComponentID(i))
+	}
+
+	r.vars = make(map[int]interface{}, len(checkSingletonFamily))
+	// for i := 0 ;i < len(checkSingletonFamily); i ++ {
+
+	// }
 }
 
 // SizeOfCom  Returns the number of existing components of the given type.
@@ -333,29 +353,29 @@ func (r *Registry) Orphan(entity EntityID) bool {
 
 // }
 
-// RegisterComponent register component by name, name should unique
-//	like entt's register.assure
-func (r *Registry) RegisterComponent(name string) ComponentID {
-	if _, ok := r.checkComponentFamily[name]; ok {
-		panic(fmt.Sprintf("register same name component %v", name))
-		// return ComponentID(tid)
-	}
+// // RegisterComponent register component by name, name should unique
+// //	like entt's register.assure
+// func (r *Registry) RegisterComponent(name string) ComponentID {
+// 	if _, ok := r.checkComponentFamily[name]; ok {
+// 		panic(fmt.Sprintf("register same name component %v", name))
+// 		// return ComponentID(tid)
+// 	}
 
-	return r.assure(name).com
-}
+// 	return r.assure(name).com
+// }
 
-func (r *Registry) assure(name string) *_PoolHandler {
-	var cid int
-	var ok bool
-	if cid, ok = r.checkComponentFamily[name]; !ok {
-		cid = len(r.checkComponentFamily)
-		r.checkComponentFamily[name] = cid
-	}
-	if !(cid < len(r.pools)) {
-		r.pools = extendPoolHandlerWithValue(r.pools, cid+1, func() *_PoolHandler { return newPool(ComponentID(cid)) })
-	}
-	return r.pools[cid]
-}
+// func (r *Registry) assure(name string) *_PoolHandler {
+// 	var cid int
+// 	var ok bool
+// 	if cid, ok = r.checkComponentFamily[name]; !ok {
+// 		cid = len(r.checkComponentFamily)
+// 		r.checkComponentFamily[name] = cid
+// 	}
+// 	if !(cid < len(r.pools)) {
+// 		r.pools = extendPoolHandlerWithValue(r.pools, cid+1, func() *_PoolHandler { return newPool(ComponentID(cid)) })
+// 	}
+// 	return r.pools[cid]
+// }
 
 // View by coms
 func (r *Registry) View(coms ...ComponentID) *View {
@@ -374,6 +394,24 @@ func (r *Registry) SingleView(com ComponentID) *SingleView {
 // Replace entity com data with newData
 func (r *Registry) Replace(entity EntityID, com ComponentID, newData interface{}) interface{} {
 	return r.pools[com].Replace(entity, newData)
+}
+
+// -------------------- context of the registry ----------------
+
+// Set Singleton data bind with the registry
+func (r *Registry) Set(singletonID SingletonID, data interface{}) interface{} {
+	r.vars[int(singletonID)] = data
+	return data
+}
+
+// Unset the singleton data bind with the registry
+func (r *Registry) Unset(singletonID SingletonID) {
+	delete(r.vars, int(singletonID))
+}
+
+// Ctx get the singleton data with the registry
+func (r *Registry) Ctx(singletonID SingletonID) interface{} {
+	return r.vars[int(singletonID)]
 }
 
 // --------------------- pool ---------------------

@@ -23,6 +23,9 @@ func (e EntityID) String() string {
 // ComponentID component runtime id
 type ComponentID uint32
 
+// SingletonID singleton runtime id
+type SingletonID uint32
+
 // _EnttPageSize must be a power of two
 const _EnttPageSize int = 1 << 15
 
@@ -40,3 +43,8 @@ const entityShift = 20     // 20bits for entity number
 
 type _KVComIDInt map[ComponentID]int
 type _KVStrInt map[string]int
+
+type _Vars struct {
+	id   int
+	data interface{}
+}

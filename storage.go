@@ -22,10 +22,10 @@ func NewStorage(com ComponentID) *Storage {
 	}
 }
 
-// Com return data type the storage binded
-func (s *Storage) Com() ComponentID {
-	return s.com
-}
+// // Com return data type the storage binded
+// func (s *Storage) Com() ComponentID {
+// 	return s.com
+// }
 
 // Reserve Increases the capacity of a storage
 func (s *Storage) Reserve(cap int) {
