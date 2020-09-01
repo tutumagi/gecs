@@ -256,15 +256,27 @@ func (r *Registry) Any(entity EntityID, coms ...ComponentID) bool {
 }
 
 // Get Returns references to the given components for an entity
+// if given components empty. return all component bind the entity
 func (r *Registry) Get(entity EntityID, coms ...ComponentID) map[ComponentID]interface{} {
-	if r.Has(entity, coms...) {
-		// TODO  should check gc
-		ret := make(map[ComponentID]interface{}, len(coms))
-		for _, com := range coms {
-			ret[com] = r.pools[com].Get(entity)
+	if len(coms) == 0 {
+		ret := make(map[ComponentID]interface{}, len(r.pools))
+		for _, pool := range r.pools {
+			if pool.Has(entity) {
+				ret[pool.com] = pool.Get(entity)
+			}
 		}
 		return ret
+	} else {
+		if r.Has(entity, coms...) {
+			// TODO  should check gc
+			ret := make(map[ComponentID]interface{}, len(coms))
+			for _, com := range coms {
+				ret[com] = r.pools[com].Get(entity)
+			}
+			return ret
+		}
 	}
+
 	return nil
 }
 

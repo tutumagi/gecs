@@ -460,6 +460,13 @@ func Test_Get(t *testing.T) {
 		Equal(t, components[AgeID].(Age), Age(1000))
 		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
 	}
+	{
+		components := registry.Get(entity0)
+		Equal(t, len(components), 3)
+		Equal(t, components[NameID].(Name), Name("zhanglei"))
+		Equal(t, components[AgeID].(Age), Age(1000))
+		Equal(t, components[PositionID].(*Position), &Position{X: 10, Y: 15, Z: 20})
+	}
 }
 
 func Test_Contains(t *testing.T) {
